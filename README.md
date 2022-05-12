@@ -1,4 +1,7 @@
 # my_ML_tools
+
+## Outline
+
 Python package that facilitates common operations in Machine Learning workflow
 with "classical" Machine Learning models. Currently only works for regression 
 problems. 
@@ -17,3 +20,7 @@ Currently implemented models:
 Models to be implemented:
 - SVM regression (scikit-learn)
 - GBM regression (XGBoost)
+
+## To-DO
+
+- Add Demo Notebook
