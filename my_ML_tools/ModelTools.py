@@ -592,8 +592,9 @@ class ModelTrainer_base:
 
         tuple(grid (sklearn.model_selection.GridSearchCV),
             tuple(results, metrics)):
-            grid: Results of hyperparameter optimization. The optimized models
-            and metrics for the optimization can be obtained from this grid.
+            grid_results: Results of hyperparameter optimization. The optimized
+            models and metrics for the optimization can be obtained from this
+            grid.
              
             (results, metrics): See return of self.train_and_evaluate().
 
@@ -603,17 +604,17 @@ class ModelTrainer_base:
         ## First optimization
         print("Optimizing Ridge regression model:")
         param_grid = dict(alpha=start_alphas)
-        grid = GridSearchCV(
+        grid_results = self.grid_search(
             model,
             param_grid,
-            cv=self.my_cv,
-            scoring='neg_root_mean_squared_error',
-            n_jobs = self.n_jobs) # Use grid-search with cross-validation
-        grid.fit(self.train_inputs, self.train_targets)
-
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name+"_first_grid_results"
+        )
+        
         # Get results from grid search
-        mean_score = grid.cv_results_["mean_test_score"]
-        alphas = grid.cv_results_["param_alpha"].tolist()
+        mean_score = grid_results.cv_results_["mean_test_score"]
+        alphas = grid_results.cv_results_["param_alpha"].tolist()
 
         # Plot results
         plt.suptitle("Ridge Regression: Optimization")
@@ -625,7 +626,7 @@ class ModelTrainer_base:
 
 
         # Get optimal value of alpha from first run
-        alpha_1 = grid.best_estimator_.get_params()["alpha"]
+        alpha_1 = grid_results.best_estimator_.get_params()["alpha"]
 
         ## Second optimization
         model = Ridge()
@@ -635,20 +636,18 @@ class ModelTrainer_base:
 
         # Use grid-search with cross-validation
         param_grid = dict(alpha=alpha_range_2)
-        grid = GridSearchCV(
+        grid_results = self.grid_search(
             model,
             param_grid,
-            cv=self.my_cv,
-            scoring='neg_root_mean_squared_error',
-            n_jobs = self.n_jobs
-        )        
-        
-        grid.fit(self.train_inputs, self.train_targets)
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name+"_second_grid_results"
+        )
 
         # Get results from grid search
-        mean_score = grid.cv_results_["mean_test_score"]
-        alphas = grid.cv_results_["param_alpha"].tolist()
-        alpha_2 = grid.best_estimator_.get_params()["alpha"]
+        mean_score = grid_results.cv_results_["mean_test_score"]
+        alphas = grid_results.cv_results_["param_alpha"].tolist()
+        alpha_2 = grid_results.best_estimator_.get_params()["alpha"]
         
         # Print results
         if(verbose == 1 or verbose == 2):
@@ -676,17 +675,9 @@ class ModelTrainer_base:
             plt.show()
         else:
             plt.close(fig)
-            
-        # Save grid results as .txt
-        if save_grid_results:
-            ModelEvaluator.grid_to_txt(
-                grid,
-                save_location=save_location,
-                save_name=save_name + "_grid_results.txt"
-            )
-            
+         
         # Optimized model
-        optimized_model = grid.best_estimator_
+        optimized_model = grid_results.best_estimator_
 
         # Get parity plots with the optimized model
         results,metrics = self.train_and_evaluate(
@@ -697,7 +688,7 @@ class ModelTrainer_base:
             save_name=save_name,
             verbose=verbose)
         
-        return grid, (results, metrics)
+        return grid_results, (results, metrics)
 
 
     ## RandomForest
