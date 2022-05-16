@@ -657,60 +657,6 @@ class ModelTrainer_base:
 
     ## RandomForest
     # Randomized search
-    def random_searchCV_rf(
-        self,
-        random_grid,
-        rs=None,
-        n_iters=70
-        ):
-        """ Function to perform randomized search with Random Forest
-            regression model to optimize hyperparameters.
-
-        Parameters:        
-        ---------
-        
-        random_grid (dict): Name of hyperparameters and their ranges 
-            to look for optimization.
-            
-        rs (int): Random state for the search and the RF models. Defaults to
-            None, so the internal rs of the modeltrainer is used.
-
-        n_iters (int): Number of steps to search for optimization. Defaults
-            to 70.
-
-        Returns:
-        ---------
-
-        rf_random (sklearn.model_selection.RandomizedSearchCV): Grid after
-        hyperparameter optimization. The optimized models and metrics for the
-        optimization can be obtained from this grid. 
-
-        """  
-        if(rs is None):
-            rs = self.rs
-        
-        model = RandomForestRegressor(
-            random_state=rs,
-            n_jobs=self.n_jobs,
-        )
-
-        # Randomized search
-        rf_random = RandomizedSearchCV(
-            estimator=model,
-            param_distributions=random_grid,
-            n_iter=n_iters,
-            cv=self.my_cv,
-            verbose=0,
-            random_state=rs,
-            scoring='neg_root_mean_squared_error',
-            n_jobs=self.n_jobs,
-            )
-
-        rf_random.fit(self.train_inputs, self.train_targets)
-
-        return rf_random
-
-         
     def tune_and_plot_rf_random(
         self,
         random_grid,
@@ -755,7 +701,7 @@ class ModelTrainer_base:
         Returns:
         ---------
 
-        tuple(grid (sklearn.model_selection.RandomizedSearchCV),
+        tuple(rf_random_grid (sklearn.model_selection.RandomizedSearchCV),
             tuple(results, metrics)):
             grid: Results of hyperparameter optimization. The optimized models
             and metrics for the optimization can be obtained from this grid.
@@ -766,22 +712,34 @@ class ModelTrainer_base:
         if (rs is None):
             rs = self.rs
         
-        # Get best Random Forest model from randomized search
-        grid = self.random_searchCV_rf(
-            random_grid,
-            n_iters=n_iters,
-            rs=rs
+        model = RandomForestRegressor(
+            random_state=rs,
+            n_jobs=self.n_jobs,
         )
+
+        # Randomized search
+        rf_random_grid = RandomizedSearchCV(
+            estimator=model,
+            param_distributions=random_grid,
+            n_iter=n_iters,
+            cv=self.my_cv,
+            verbose=0,
+            random_state=rs,
+            scoring='neg_root_mean_squared_error',
+            n_jobs=self.n_jobs,
+            )
+
+        rf_random_grid.fit(self.train_inputs, self.train_targets)
         
         # Save grid results as .txt
         if save_grid_results:
             ModelEvaluator.grid_to_txt(
-                grid,
+                rf_random_grid,
                 save_location=save_location,
                 save_name=save_name + "_grid_results.txt"
             )
 
-        optimized_model = grid.best_estimator_
+        optimized_model = rf_random_grid.best_estimator_
 
         # Parity plots with the optimized model
         results,metrics = self.train_and_evaluate(
@@ -792,61 +750,13 @@ class ModelTrainer_base:
             save_name=save_name,
             verbose=verbose)
 
-        return grid, (results, metrics)
+        return rf_random_grid, (results, metrics)
 
-
-
-    def grid_searchCV_rf(
-        self,
-        grid,
-        rs=None
-    ):
-        """ Function to perform grid search with Random Forest
-            regression model to optimize hyperparameters.
-
-        Parameters:        
-        ---------
-        
-        grid (dict): Name of hyperparameters and their ranges 
-            for optimization.
-
-        rs (int): Random state for the RF models. Defaults to None, 
-            so the internal rs of the modeltrainer is used.
-        
-        Returns:
-        ---------
-
-        rf_grid (sklearn.model_selection.GridSearchCV): Grid after
-            hyperparameter optimization. The optimized models and metrics for
-            the optimization can be obtained from this grid. 
-
-        """
-        if (rs is None):
-            rs = self.rs
-        
-        # Define model
-        model = RandomForestRegressor(
-            random_state=rs,
-            n_jobs=self.n_jobs
-            )
-
-        # Grid search
-        rf_grid = GridSearchCV(
-            model,
-            grid,
-            cv=self.my_cv,
-            verbose=0,
-            scoring='neg_root_mean_squared_error',
-            n_jobs=self.n_jobs)
-
-        rf_grid.fit(self.train_inputs, self.train_targets)
-
-        return rf_grid
         
 
     def tune_and_plot_rf_grid(
         self,
-        random_grid,
+        rf_grid_results,
         rs=None,
         save_fig=False,
         save_grid_results=False,
@@ -860,7 +770,7 @@ class ModelTrainer_base:
         Parameters:
         ---------
 
-        random_grid (dict): Name of hyperparameters and their ranges 
+        grid (dict): Name of hyperparameters and their ranges 
           for optimization.
           
         rs (int): Random state for the search and the RF models. Defaults to
@@ -886,7 +796,7 @@ class ModelTrainer_base:
         Returns:
         ---------
 
-        tuple(grid (sklearn.model_selection.GridSearchCV),
+        tuple(rf_grid_results (sklearn.model_selection.GridSearchCV),
             tuple(results, metrics)):
             grid: Results of hyperparameter optimization. The optimized models
             and metrics for the optimization can be obtained from this grid.
@@ -896,15 +806,31 @@ class ModelTrainer_base:
         """
         if (rs is None):
             rs = self.rs
+            
+        # Define model
+        model = RandomForestRegressor(
+            random_state=rs,
+            n_jobs=self.n_jobs
+            )
+
+        # Grid search
+        rf_grid_results = GridSearchCV(
+            model,
+            rf_grid_results,
+            cv=self.my_cv,
+            verbose=0,
+            scoring='neg_root_mean_squared_error',
+            n_jobs=self.n_jobs)
+
+        rf_grid_results.fit(self.train_inputs, self.train_targets)
         
         # Get best Random Forest model from Random Search
-        grid = self.grid_searchCV_rf(random_grid, rs=rs)
-        optimized_model = grid.best_estimator_
+        optimized_model = rf_grid_results.best_estimator_
 
         # Save grid results as .txt
         if save_grid_results:
             ModelEvaluator.grid_to_txt(
-                grid,
+                rf_grid_results,
                 save_location=save_location,
                 save_name=save_name + "_grid_results.txt"
             )
@@ -920,7 +846,7 @@ class ModelTrainer_base:
         )
         
         # Return results
-        return grid, (results, metrics)
+        return rf_grid_results, (results, metrics)
     
     
     def tune_and_plot_rf(
