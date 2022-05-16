@@ -306,7 +306,6 @@ class ModelTrainer_base:
 
 
     ## Class methods
-
     @classmethod
     def set_train_lim(cls, lim):
         cls.train_lim = lim
@@ -317,7 +316,7 @@ class ModelTrainer_base:
         cls.test_lim = lim
 
 
-    ## Methods
+    ## General ML Methods
     def train_and_evaluate(
         self,
         model,
@@ -347,8 +346,63 @@ class ModelTrainer_base:
         """ Needs to be adjusted for child classes!"""
         raise(NotImplementedError("""This method needs to be implemented in 
             child class!"""))
-        
 
+    
+    def grid_search(
+        self,
+        model,
+        grid,
+        save_grid_results=False,
+        save_location="",
+        save_name="grid"
+    ):
+        """ Performs grid search with a given model. 
+        
+        Parameters:
+        ---------
+        
+        model (model from scikit-learn): Model to use in grid search.
+        
+        grid (dict): Hyperparameters to use in grid search.
+        
+        save_grid_results (Boolean): Whether to save the results as text file.
+            Defaults to False.
+        
+        save_location (String): Location to save the results. Defaults to 
+            current directory. 
+            
+        save_name (String): Name of the saved file. Defaults to "grid".  
+        
+        
+        Returns:
+        ---------
+        
+        grid_search (sklearn.model_selection.GridSearchCV): Grid containing
+            the results of the grid search.
+        
+        """
+        # Create grid and start search
+        grid_search = GridSearchCV(
+            model,
+            grid,
+            cv=self.my_cv,
+            scoring='neg_root_mean_squared_error',
+            n_jobs = self.n_jobs
+        )
+        
+        grid_search.fit(self.train_inputs, self.train_targets)
+        
+        # Save results of grid search
+        if save_grid_results:
+            ModelEvaluator.grid_to_txt(
+                grid_search,
+                save_location=save_location,
+                save_name=save_name+".txt"
+            )
+        
+        return grid_search
+        
+         
     ## Lasso Regression
     def tune_and_plot_lasso(
         self,
@@ -393,7 +447,7 @@ class ModelTrainer_base:
         Returns: 
         ---------
 
-        tuple(grid (sklearn.model_selection.GridSearchCV),
+        tuple(grid_results (sklearn.model_selection.GridSearchCV),
             tuple(results, metrics)):
             grid: Results of hyperparameter optimization. The optimized models
             and metrics for the optimization can be obtained from this grid.
@@ -407,17 +461,17 @@ class ModelTrainer_base:
         ## First optimization
         print("Optimizing Lasso regression model:")
         param_grid = dict(alpha=start_alphas)
-        grid = GridSearchCV(
+        grid_results = self.grid_search(
             model,
             param_grid,
-            cv=self.my_cv,
-            scoring='neg_root_mean_squared_error',
-            n_jobs = self.n_jobs) # Use grid-search with cross-validation
-        grid.fit(self.train_inputs, self.train_targets)
-
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name+"_first_grid_results"
+        )
+        
         # Get results from grid search
-        mean_score = grid.cv_results_["mean_test_score"]
-        alphas = grid.cv_results_["param_alpha"].tolist()
+        mean_score = grid_results.cv_results_["mean_test_score"]
+        alphas = grid_results.cv_results_["param_alpha"].tolist()
 
         # Plot results
         plt.suptitle("Lasso Regression: Optimization")
@@ -428,7 +482,7 @@ class ModelTrainer_base:
         axs[0].set_ylabel("RMSE")
 
         # Get optimal value of alpha from first run
-        alpha_1 = grid.best_estimator_.get_params()["alpha"]
+        alpha_1 = grid_results.best_estimator_.get_params()["alpha"]
 
         ## Second optimization
         model = Lasso()
@@ -438,19 +492,18 @@ class ModelTrainer_base:
         param_grid = dict(alpha=alpha_range_2)
         
         # Use grid-search with cross-validation
-        grid = GridSearchCV(
+        grid_results = self.grid_search(
             model,
             param_grid,
-            cv=self.my_cv,
-            scoring='neg_root_mean_squared_error',
-            n_jobs = self.n_jobs
-        ) 
-        grid.fit(self.train_inputs, self.train_targets)
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name+"_second_grid_results"
+        )
 
         # Get results from grid search
-        mean_score = grid.cv_results_["mean_test_score"]
-        alphas = grid.cv_results_["param_alpha"].tolist() 
-        alpha_2 = grid.best_estimator_.get_params()["alpha"]
+        mean_score = grid_results.cv_results_["mean_test_score"]
+        alphas = grid_results.cv_results_["param_alpha"].tolist() 
+        alpha_2 = grid_results.best_estimator_.get_params()["alpha"]
         
         # Print results
         if(verbose == 1 or verbose == 2):
@@ -473,14 +526,6 @@ class ModelTrainer_base:
                 bbox_inches="tight"
             )
             
-        # Save grid results as .txt
-        if save_grid_results:
-            ModelEvaluator.grid_to_txt(
-                grid,
-                save_location=save_location,
-                save_name=save_name + "_grid_results.txt"
-            )
-
         # Plot the model
         if(verbose == 2):
             plt.show()
@@ -488,7 +533,7 @@ class ModelTrainer_base:
             plt.close(fig)
 
         # Optimized model
-        optimized_model = grid.best_estimator_
+        optimized_model = grid_results.best_estimator_
 
         # Get parity plots with the optimized model
         results,metrics = self.train_and_evaluate(
@@ -499,7 +544,7 @@ class ModelTrainer_base:
             save_name=save_name,
             verbose=verbose)
         
-        return grid, (results, metrics)
+        return grid_results, (results, metrics)
 
 
     ## Ridge Regression
