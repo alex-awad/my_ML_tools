@@ -719,9 +719,9 @@ class ModelTrainer_base:
         save_fig=False,
         save_grid_results=False,
         save_location="",
-        save_name="Random_Forest_RandomSearchCV",
+        save_name="Random_Forest_RandomizedSearchCV",
         verbose=2
-        ):
+    ):
         """ Tune Random Forest regression model with randomized search and plot
             the results of the optimized models in a parity plot.
 
@@ -919,8 +919,162 @@ class ModelTrainer_base:
             verbose=verbose
         )
         
-        # Return optimized model
+        # Return results
         return grid, (results, metrics)
+    
+    
+    def tune_and_plot_rf(
+        self,
+        start_grid,
+        n_iters_first=70,
+        rs=None,
+        save_fig=False,
+        save_grid_results=False,
+        save_location="",
+        save_name="Random_Forest",
+        verbose=2
+    ):
+        """ Optimizes the hyperparameters from Random Forest regression in two
+            steps, first using randomized search, then a consecutive grid search
+            with the results from the first search. 
+            
+        Parameters:
+        ---------
+        
+        start_grid (dict): Name of hyperparameters and their ranges for
+          first optimization with RandomizedSearchCV.
+          
+        n_iters_first (int): Number of maximal iterations for first randomized
+            search. Defaults to 70.
+        
+        rs (int): Random state for the search and the RF models. Defaults to
+            None, so the internal rs of the modeltrainer is used.
+
+        save_fig (boolean): Whether to save the figure. Defaults to False.
+        
+        save_grid_results (Boolen): Whether to save results of hyperparameter
+            tuning as text file. Defaults to False.
+
+        save_location (String): Directory to save the figure. Defaults to
+            current directory.
+
+        save_name (String): Name of the saved figure. Defaults to
+            "Random_Forest".
+            
+        verbose (int): Verbosity of the output: 
+            2: Print results and show parity plot.
+            1: Show parity plot.
+            0: Do not print and do not show parity plot. 
+            Defaults to 2.
+
+        Returns:
+        ---------
+
+        tuple(grid (sklearn.model_selection.GridSearchCV),
+            tuple(results, metrics)):
+            grid: Results of hyperparameter optimization. The optimized models
+            and metrics for the optimization can be obtained from this grid.
+            
+            (results, metrics): See return of self.train_and_evaluate().    
+        
+        """
+        if rs is None:
+            rs = self.rs
+            
+            
+        # Get grid and its parameters from first randomized search
+        first_results_grid = self.tune_and_plot_rf_random(
+            start_grid,
+            n_iters=n_iters_first,
+            rs=rs,
+            save_fig=False,
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name="Random_Forest_RandomizedSearchCV",
+            verbose=verbose
+        )[0]
+        
+        
+        first_optimized_params = first_results_grid.best_params_
+        
+        # Set range for second search (grid-search)
+        n_estimators_random = first_optimized_params["n_estimators"]
+        n_estimators = [
+            n_estimators_random-50,
+            n_estimators_random,
+            n_estimators_random+50
+        ]
+        
+        max_features_random = first_optimized_params["max_features"]
+        # Check if max_featres_random is "auto", "log", or "sqrt"
+        if(isinstance(max_features_random, str)):
+            # max_features = "auto" means max_features = n_features (= 1.0)
+            if(max_features_random == "auto"):
+                max_features_new = [
+                    0.8,
+                    0.9,
+                    "auto"
+                ]
+                
+            elif(max_features_random == "sqrt" or max_features_random == "log"):
+                max_features_new = [
+                    0.3,
+                    max_features_random,
+                    0.5
+                ]    
+        else:
+            if(max_features_random >= 0.9):
+                max_features_new = [
+                    0.8,
+                    0.9,
+                    "auto"
+                ]
+            elif(max_features_random <= 0.1):
+                max_features_new = [
+                    0.05,
+                    0.1,
+                    0.15
+                ]
+            else:
+                max_features_new = [
+                    max_features_random - 0.1,
+                    max_features_random,
+                    max_features_random + 0.1
+                ]
+        max_features = max_features_new
+        
+        
+        max_depth_random = first_optimized_params["max_depth"]
+        max_depth = [
+            max_depth_random - 1,
+            max_depth_random, 
+            max_depth_random +1
+        ]
+        
+        # Don't change bootstrap
+        bootstrap = [first_optimized_params["bootstrap"]] 
+        
+        # Create new grid and do second optmization
+        param_grid = {
+            "n_estimators": n_estimators,
+            "max_features": max_features,
+            "max_depth": max_depth,
+            "bootstrap": bootstrap
+        }
+        
+        grid, (results, metrics) = self.tune_and_plot_rf_grid(
+            param_grid,
+            rs=rs,
+            save_fig=save_fig,
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name,
+            verbose=verbose
+        )
+        
+        # Return results
+        return grid, (results, metrics)
+                
 
 
     ## Keras sequential
