@@ -24,8 +24,8 @@ from sklearn.metrics import r2_score
 
 from sklearn.linear_model import Lasso
 from sklearn.linear_model import Ridge
-from sklearn.linear_model import ElasticNet
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.svm import SVR
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
@@ -763,7 +763,94 @@ class ModelTrainer_base:
         return grid_results, (results, metrics)
 
 
-    ## RandomForest
+    ## Support Vector Machine (SVM)
+    def tune_and_plot_svm_random(
+        self,
+        random_grid,
+        n_iters=70,
+        rs=None,
+        save_fig=False,
+        save_grid_results=False,
+        save_location="",
+        save_name="SVM_RandomizedSearchCV",
+        verbose=2
+        
+    ):
+        """ Tune SVM regression model with randomized search and plot the
+            results of the optimized models in a parity plot.
+
+        Parameters:
+        ---------
+
+        random_grid (dict): Name of hyperparameters and their ranges 
+          for optimization.
+          
+        rs (int): Random state for the search and the SVM models. Defaults to
+            None, so the internal rs of the modeltrainer is used.
+
+        save_fig (boolean): Whether to save the figure. Defaults to False.
+        
+        save_grid_results (Boolean): Whether to save results of hyperparameter
+            tuning as text file. Defaults to False.
+
+        save_location (String): Directory to save the figure. Defaults to
+            current directory.
+
+        save_name (String): Name of the saved figure. Defaults to
+            "SVM_RandomSearchCV".
+            
+        verbose (int): Verbosity of the output: 
+            2: Print results and show parity plot.
+            1: Show parity plot.
+            0: Do not print and do not show parity plot. 
+            Defaults to 2.
+            
+
+        Returns:
+        ---------
+
+        tuple(svm_random_grid_results
+            (sklearn.model_selection.RandomizedSearchCV),
+            tuple(results, metrics)):
+            
+            svm_random_grid_results: Results of hyperparameter optimization.
+                The optimized models and metrics for the optimization can be
+                obtained from this grid.
+             
+            (results, metrics): See return of self.train_and_evaluate().
+
+        """
+        if (rs is None):
+            rs = self.rs
+            
+        model = SVR()
+        
+        # Randomized search
+        svm_random_grid_results = self.randomized_search(
+            model,
+            random_grid,
+            n_iters=n_iters,
+            rs=rs,
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name
+        )
+
+        optimized_model = svm_random_grid_results.best_estimator_
+
+        # Parity plots with the optimized model
+        results,metrics = self.train_and_evaluate(
+            optimized_model,
+            fig_title="SVM Regression (Random_SearchCV)",
+            save_fig=save_fig,
+            save_location=save_location,
+            save_name=save_name,
+            verbose=verbose)
+
+        return svm_random_grid_results, (results, metrics)
+            
+    
+    ## RandomForest (rf)
     # Randomized search
     def tune_and_plot_rf_random(
         self,
