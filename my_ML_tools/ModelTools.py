@@ -792,7 +792,7 @@ class ModelTrainer_base:
 
     def tune_and_plot_rf_grid(
         self,
-        rf_grid_results,
+        rf_grid,
         rs=None,
         save_fig=False,
         save_grid_results=False,
@@ -806,7 +806,7 @@ class ModelTrainer_base:
         Parameters:
         ---------
 
-        grid (dict): Name of hyperparameters and their ranges 
+        rf_grid (dict): Name of hyperparameters and their ranges 
           for optimization.
           
         rs (int): Random state for the search and the RF models. Defaults to
@@ -850,26 +850,16 @@ class ModelTrainer_base:
             )
 
         # Grid search
-        rf_grid_results = GridSearchCV(
+        rf_grid_results = self.grid_search(
             model,
-            rf_grid_results,
-            cv=self.my_cv,
-            verbose=0,
-            scoring='neg_root_mean_squared_error',
-            n_jobs=self.n_jobs)
-
-        rf_grid_results.fit(self.train_inputs, self.train_targets)
+            rf_grid,
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name+"_grid_results"
+        )
         
         # Get best Random Forest model from Random Search
         optimized_model = rf_grid_results.best_estimator_
-
-        # Save grid results as .txt
-        if save_grid_results:
-            ModelEvaluator.grid_to_txt(
-                rf_grid_results,
-                save_location=save_location,
-                save_name=save_name + "_grid_results.txt"
-            )
 
         # Get parity plots with the optimized model
         results,metrics = self.train_and_evaluate(
