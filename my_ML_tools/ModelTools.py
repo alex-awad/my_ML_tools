@@ -348,6 +348,75 @@ class ModelTrainer_base:
             child class!"""))
 
     
+    def randomized_search(
+        self,
+        model,
+        grid,
+        n_iters=70,
+        rs=None,
+        save_grid_results=False,
+        save_location="",
+        save_name="random_search"
+    ):
+        """ Performs randomized search with a given model.
+        
+        Parameters:
+        ---------
+        
+        model (model from scikit-learn): Model to use in grid search.
+        
+        grid (dict): Hyperparameters to use in grid search.
+        
+        n_iters (int): Maximum number of iterations used for the randomized
+            search. Defaults to 70.
+        
+        rs (int): Random state for the search. Defaults to None, so the internal
+            rs of the modeltrainer is used.
+        
+        save_grid_results (Boolean): Whether to save the results as text file.
+            Defaults to False.
+        
+        save_location (String): Location to save the results. Defaults to 
+            current directory. 
+            
+        save_name (String): Name of the saved file. Defaults to "grid".  
+        
+        
+        Returns:
+        ---------
+        
+        random_search_results (sklearn.model_selection.RandomizedSearchCV): Grid
+        containing the results of the randomized search.
+        
+        """
+        if(rs is None):
+            rs = self.rs
+        
+        # Create randomized search and start it
+        random_search_results = RandomizedSearchCV(
+            model,
+            grid,
+            random_state=rs,
+            n_iter=n_iters,
+            cv=self.my_cv,
+            verbose=0,
+            scoring='neg_root_mean_squared_error',
+            n_jobs=self.n_jobs,          
+        )
+        
+        random_search_results.fit(self.train_inputs, self.train_targets)
+        
+        # Save results of grid search
+        if save_grid_results:
+            ModelEvaluator.grid_to_txt(
+                random_search_results,
+                save_location=save_location,
+                save_name=save_name+".txt"
+            )
+        
+        return random_search_results
+            
+    
     def grid_search(
         self,
         model,
@@ -377,12 +446,12 @@ class ModelTrainer_base:
         Returns:
         ---------
         
-        grid_search (sklearn.model_selection.GridSearchCV): Grid containing
-            the results of the grid search.
+        grid_search_results (sklearn.model_selection.GridSearchCV): Grid
+        containing the results of the grid search.
         
         """
         # Create grid and start search
-        grid_search = GridSearchCV(
+        grid_search_results = GridSearchCV(
             model,
             grid,
             cv=self.my_cv,
@@ -390,17 +459,17 @@ class ModelTrainer_base:
             n_jobs = self.n_jobs
         )
         
-        grid_search.fit(self.train_inputs, self.train_targets)
+        grid_search_results.fit(self.train_inputs, self.train_targets)
         
         # Save results of grid search
         if save_grid_results:
             ModelEvaluator.grid_to_txt(
-                grid_search,
+                grid_search_results,
                 save_location=save_location,
                 save_name=save_name+".txt"
             )
         
-        return grid_search
+        return grid_search_results
         
          
     ## Lasso Regression
@@ -426,7 +495,7 @@ class ModelTrainer_base:
 
         save_fig (Boolean): Whether to save the figure. Defaults to False.
         
-        save_grid_results (Boolen): Whether to save results of hyperparameter
+        save_grid_results (Boolean): Whether to save results of hyperparameter
             tuning as text file. Defaults to False.
 
         iters_second (int): Number of points for second optimization.
@@ -449,8 +518,10 @@ class ModelTrainer_base:
 
         tuple(grid_results (sklearn.model_selection.GridSearchCV),
             tuple(results, metrics)):
-            grid: Results of hyperparameter optimization. The optimized models
-            and metrics for the optimization can be obtained from this grid.
+            
+            grid_results: Results of hyperparameter optimization. The optimized
+            models and metrics for the optimization can be obtained from this
+            grid.
              
             (results, metrics): See return of self.train_and_evaluate().
 
@@ -570,7 +641,7 @@ class ModelTrainer_base:
 
         save_fig (Boolean): Whether to save the figure. Defaults to False.
         
-        save_grid_results (Boolen): Whether to save results of hyperparameter
+        save_grid_results (Boolean): Whether to save results of hyperparameter
             tuning as text file. Defaults to False.
 
         iters_second (int): Number of points for second optimization.
@@ -590,8 +661,9 @@ class ModelTrainer_base:
         Returns: 
         ---------
 
-        tuple(grid (sklearn.model_selection.GridSearchCV),
+        tuple(grid_results (sklearn.model_selection.GridSearchCV),
             tuple(results, metrics)):
+            
             grid_results: Results of hyperparameter optimization. The optimized
             models and metrics for the optimization can be obtained from this
             grid.
@@ -718,7 +790,7 @@ class ModelTrainer_base:
 
         save_fig (boolean): Whether to save the figure. Defaults to False.
         
-        save_grid_results (Boolen): Whether to save results of hyperparameter
+        save_grid_results (Boolean): Whether to save results of hyperparameter
             tuning as text file. Defaults to False.
 
         save_location (String): Directory to save the figure. Defaults to
@@ -737,10 +809,13 @@ class ModelTrainer_base:
         Returns:
         ---------
 
-        tuple(rf_random_grid (sklearn.model_selection.RandomizedSearchCV),
+        tuple(rf_random_grid_results
+            (sklearn.model_selection.RandomizedSearchCV),
             tuple(results, metrics)):
-            grid: Results of hyperparameter optimization. The optimized models
-            and metrics for the optimization can be obtained from this grid.
+            
+            rf_random_grid_results: Results of hyperparameter optimization.
+                The optimized models and metrics for the optimization can be
+                obtained from this grid.
              
             (results, metrics): See return of self.train_and_evaluate().
 
@@ -754,28 +829,17 @@ class ModelTrainer_base:
         )
 
         # Randomized search
-        rf_random_grid = RandomizedSearchCV(
-            estimator=model,
-            param_distributions=random_grid,
-            n_iter=n_iters,
-            cv=self.my_cv,
-            verbose=0,
-            random_state=rs,
-            scoring='neg_root_mean_squared_error',
-            n_jobs=self.n_jobs,
-            )
+        rf_random_grid_results = self.randomized_search(
+            model,
+            random_grid,
+            n_iters=n_iters,
+            rs=rs,
+            save_grid_results=save_grid_results,
+            save_location=save_location,
+            save_name=save_name
+        )
 
-        rf_random_grid.fit(self.train_inputs, self.train_targets)
-        
-        # Save grid results as .txt
-        if save_grid_results:
-            ModelEvaluator.grid_to_txt(
-                rf_random_grid,
-                save_location=save_location,
-                save_name=save_name + "_grid_results.txt"
-            )
-
-        optimized_model = rf_random_grid.best_estimator_
+        optimized_model = rf_random_grid_results.best_estimator_
 
         # Parity plots with the optimized model
         results,metrics = self.train_and_evaluate(
@@ -786,7 +850,7 @@ class ModelTrainer_base:
             save_name=save_name,
             verbose=verbose)
 
-        return rf_random_grid, (results, metrics)
+        return rf_random_grid_results, (results, metrics)
 
         
 
@@ -814,7 +878,7 @@ class ModelTrainer_base:
 
         save_fig (boolean): Whether to save the figure. Defaults to False.
         
-        save_grid_results (Boolen): Whether to save results of hyperparameter
+        save_grid_results (Boolean): Whether to save results of hyperparameter
             tuning as text file. Defaults to False.
 
         save_location (String): Directory to save the figure. Defaults to
@@ -834,8 +898,10 @@ class ModelTrainer_base:
 
         tuple(rf_grid_results (sklearn.model_selection.GridSearchCV),
             tuple(results, metrics)):
-            grid: Results of hyperparameter optimization. The optimized models
-            and metrics for the optimization can be obtained from this grid.
+            
+            rf_grid_results: Results of hyperparameter optimization. The
+            optimized models and metrics for the optimization can be obtained 
+            from this grid.
              
             (results, metrics): See return of self.train_and_evaluate().
 
@@ -904,7 +970,7 @@ class ModelTrainer_base:
 
         save_fig (boolean): Whether to save the figure. Defaults to False.
         
-        save_grid_results (Boolen): Whether to save results of hyperparameter
+        save_grid_results (Boolean): Whether to save results of hyperparameter
             tuning as text file. Defaults to False.
 
         save_location (String): Directory to save the figure. Defaults to
@@ -1006,7 +1072,7 @@ class ModelTrainer_base:
         # Don't change bootstrap
         bootstrap = [first_optimized_params["bootstrap"]] 
         
-        # Create new grid and do second optmization
+        # Create new grid and do second optimization
         param_grid = {
             "n_estimators": n_estimators,
             "max_features": max_features,
