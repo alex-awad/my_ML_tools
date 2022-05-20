@@ -15,11 +15,10 @@ Currently implemented models:
 - Lasso regression (scikit-learn)
 - Ridge regression (scikit-learn)
 - Random Forest regression (scikit-learn) 
-- Multilayer Perceptron regression (Keras)
-
-Models to be implemented:
 - SVM regression (scikit-learn)
 - GBM regression (XGBoost)
+- Multilayer Perceptron regression (Keras)
+
 
 ## To-DO
 
