@@ -20,6 +20,6 @@ Currently implemented models:
 - Multilayer Perceptron regression (Keras)
 
 
-## To-DO
+## To-do
 
 - Add Demo Notebook
