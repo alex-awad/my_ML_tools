@@ -919,7 +919,7 @@ class ModelTrainer_base:
         # Get parity plots with the optimized model
         results,metrics = self.train_and_evaluate(
             optimized_model,
-            fig_title="Random Forest Regression (Grid_SearchCV)",
+            fig_title="SVM regression (Grid_SearchCV)",
             save_fig=save_fig,
             save_location=save_location,
             save_name=save_name,
@@ -1800,7 +1800,7 @@ class Modeltrainer_train_test(ModelTrainer_base):
         Parameters:
         ----------
 
-        model (from scikit-learn or Keras): Regression model to train.
+        model (from scikit-learn, Keras or XGBoost): Regression model to train.
 
         fig_title (String): Title of the parity plot. Defaults to "".
 
@@ -1979,7 +1979,7 @@ class Modeltrainer_train_test(ModelTrainer_base):
         Parameters:
         ----------
 
-        model (from scikit-learn or keras): Regression model to train.
+        model (from scikit-learn, XGBoost or keras): Regression model to train.
 
         fig_title (String): Title of the parity plot. Defaults to "".
 
