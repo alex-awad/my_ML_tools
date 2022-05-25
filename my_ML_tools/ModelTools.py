@@ -315,6 +315,11 @@ class ModelTrainer_base:
     @classmethod
     def set_test_lim(cls, lim):
         cls.test_lim = lim
+        
+    
+    @classmethod
+    def set_n_jobs(cls, n_jobs):
+        cls.n_jobs=n_jobs
 
 
     ## General ML Methods
