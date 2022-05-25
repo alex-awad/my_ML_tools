@@ -1409,7 +1409,7 @@ class ModelTrainer_base:
             (results, metrics): See return of self.train_and_evaluate().
         
         """
-        print("Optimizing SVM regression model (grid search):")            
+        print("Optimizing GBM regression model (grid search):")            
         # Define model
         model = XGBRegressor(
             n_jobs=self.n_jobs
