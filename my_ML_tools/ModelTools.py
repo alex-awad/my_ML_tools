@@ -821,6 +821,7 @@ class ModelTrainer_base:
             (results, metrics): See return of self.train_and_evaluate().
 
         """
+        print("Optimizing SVM regression model (randomized search):")
         if (rs is None):
             rs = self.rs
             
@@ -900,7 +901,8 @@ class ModelTrainer_base:
              
             (results, metrics): See return of self.train_and_evaluate().
         
-        """            
+        """   
+        print("Optimizing SVM regression model (grid search):")         
         # Define model
         model = SVR()
 
@@ -1163,6 +1165,7 @@ class ModelTrainer_base:
             (results, metrics): See return of self.train_and_evaluate().    
         
         """
+        print("Optimizing Random Forest regression model:")
         if rs is None:
             rs = self.rs
             
@@ -1318,6 +1321,7 @@ class ModelTrainer_base:
             (results, metrics): See return of self.train_and_evaluate().
 
         """
+        print("Optimizing GBM regression model (randomized search):")
         if (rs is None):
             rs = self.rs
             
@@ -1399,7 +1403,8 @@ class ModelTrainer_base:
              
             (results, metrics): See return of self.train_and_evaluate().
         
-        """            
+        """
+        print("Optimizing SVM regression model (grid search):")            
         # Define model
         model = XGBRegressor(
             n_jobs=self.n_jobs
