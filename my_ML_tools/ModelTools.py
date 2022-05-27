@@ -563,7 +563,7 @@ class ModelTrainer_base:
 
         ## Second optimization
         model = Lasso()
-        alpha_range_2 = np.linspace(alpha_1*0.8, alpha_1*1.2, num=iters_second) \
+        alpha_range_2 = np.linspace(alpha_1*0.8, alpha_1*1.25, num=iters_second) \
             .tolist() 
 
         param_grid = dict(alpha=alpha_range_2)
@@ -709,7 +709,7 @@ class ModelTrainer_base:
         ## Second optimization
         model = Ridge()
 
-        alpha_range_2 = np.linspace(alpha_1*0.8, alpha_1*1.2, num=iters_second) \
+        alpha_range_2 = np.linspace(alpha_1*0.8, alpha_1*1.25, num=iters_second) \
             .tolist()
 
         # Use grid-search with cross-validation
