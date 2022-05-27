@@ -182,7 +182,7 @@ class ModelEvaluator:
     @staticmethod
     def grid_to_txt(
         grid,
-        save_location="",
+        save_location="./",
         save_name="grid.txt"
     ):
         """ Uses trained grid from GridSearchCV or RandomizedSearchCV and saves
@@ -329,7 +329,7 @@ class ModelTrainer_base:
         fig_title="",
         font_scale=1.5,
         save_fig=False,
-        save_location="",
+        save_location="./",
         save_name="Figure",
         save_grid_results=False,
         verbose=2
@@ -346,7 +346,7 @@ class ModelTrainer_base:
         font_scale=1.5,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="Figure"
     ):
         """ Needs to be adjusted for child classes!"""
@@ -361,7 +361,7 @@ class ModelTrainer_base:
         n_iters=70,
         rs=None,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="random_search"
     ):
         """ Performs randomized search with a given model.
@@ -428,7 +428,7 @@ class ModelTrainer_base:
         model,
         grid,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="grid"
     ):
         """ Performs grid search with a given model. 
@@ -485,7 +485,7 @@ class ModelTrainer_base:
         iters_second=1000,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="Lasso",
         verbose=2
         ):
@@ -632,7 +632,7 @@ class ModelTrainer_base:
         iters_second=1000,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="Ridge",
         verbose=2):
         """ Optimizes the hyperparameter alpha from ridge regression.
@@ -777,7 +777,7 @@ class ModelTrainer_base:
         rs=None,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="SVM_RandomizedSearchCV",
         verbose=2
         
@@ -862,7 +862,7 @@ class ModelTrainer_base:
         svm_grid,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="SVM_GridSearchCV",
         verbose=2
     ):
@@ -946,7 +946,7 @@ class ModelTrainer_base:
         rs=None,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="Random_Forest_RandomizedSearchCV",
         verbose=2
     ):
@@ -1034,7 +1034,7 @@ class ModelTrainer_base:
         rs=None,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="Random_Forest_GridSearchCV",
         verbose=2
         ):
@@ -1122,7 +1122,7 @@ class ModelTrainer_base:
         rs=None,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="Random_Forest",
         verbose=2
     ):
@@ -1277,7 +1277,7 @@ class ModelTrainer_base:
         rs=None,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="GBM_RandomizedSearchCV",
         verbose=2
         
@@ -1364,7 +1364,7 @@ class ModelTrainer_base:
         svm_grid,
         save_fig=False,
         save_grid_results=False,
-        save_location="",
+        save_location="./",
         save_name="GBM_GridSearchCV",
         verbose=2
     ):
@@ -1797,7 +1797,7 @@ class Modeltrainer_train_test(ModelTrainer_base):
         fig_title="",
         font_scale=1.5,
         save_fig=False,
-        save_location="",
+        save_location="./",
         save_name="Figure",
         verbose=2
     ):
@@ -1978,7 +1978,7 @@ class Modeltrainer_train_test(ModelTrainer_base):
         fig_title="",
         font_scale=1.5,
         save_fig=False,
-        save_location="",
+        save_location="./",
         save_name="Figure",
         verbose=2):
         """ Evaluate an already trained model by printing accuracy metrics of
