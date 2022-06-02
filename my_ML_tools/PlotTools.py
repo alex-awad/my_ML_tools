@@ -1,6 +1,8 @@
 """ Package with methods to facilitate plotting """
 
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg') 
 import seaborn as sns
 import numpy as np
 
