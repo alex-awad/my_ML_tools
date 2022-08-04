@@ -2,6 +2,7 @@
 
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.ticker import MultipleLocator
 matplotlib.use('Agg') 
 import seaborn as sns
 import numpy as np
@@ -18,6 +19,7 @@ class PlotTools:
         column,
         binwidth=None,
         binrange=None,
+        hist_minor_ticks=None,
         alt_xlabel=None,
         save_fig=False,
         save_location="",
@@ -43,6 +45,9 @@ class PlotTools:
 
         binrange (tuple<float,float>): Minimum and maximum limit of histogram.
             Defaults to None. Thus, it is automatically identified.
+            
+        hist_minor_ticks (float): Interval of minor ticks to be added in histogram.
+            Defaults to None, so no minor ticks are set.
 
         alt_xlabel (String): Alternative label for the column to be displayed 
             in the plots. Defaults to None. Thus, the label represents the 
@@ -90,6 +95,9 @@ class PlotTools:
             binrange=binrange,
             edgecolor="black",
             linewidth=0.5)
+        
+        if hist_minor_ticks is not None:
+            ax_hist.xaxis.set_minor_locator(MultipleLocator(hist_minor_ticks))
 
         # Change aperance of the boxplot
         for i,box in enumerate(ax_box.artists):
