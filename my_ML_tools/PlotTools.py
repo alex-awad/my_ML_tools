@@ -411,7 +411,7 @@ class PlotTools:
         ax.set_xlim(*ax_lim)
         ax.set_ylim(*ax_lim)
         ax.set_xlabel(f"True {label_name}")
-        ax.set_ylabel(f"True {label_name}")
+        ax.set_ylabel(f"Predicted {label_name}")
             
         fig.tight_layout()
 
