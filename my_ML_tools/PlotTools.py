@@ -146,15 +146,15 @@ class PlotTools:
             else targets.min()
 
         # Get highest point
-        max_testue = predictions.max() if predictions.max() > targets.max() \
+        max_value = predictions.max() if predictions.max() > targets.max() \
             else targets.max()
 
         # Get higher and lower absolute value
-        higher_value = abs(min_value) if abs(min_value) > abs(max_testue) \
-            else abs(max_testue)
+        higher_value = abs(min_value) if abs(min_value) > abs(max_value) \
+            else abs(max_value)
 
-        lower_value = abs(min_value) if abs(min_value) < abs(max_testue) \
-            else abs(max_testue)
+        lower_value = abs(min_value) if abs(min_value) < abs(max_value) \
+            else abs(max_value)
 
         # Get difference between higher and lower absolute value
         diff = higher_value - lower_value
@@ -162,7 +162,7 @@ class PlotTools:
         # Return limits with an extra margin for better plots
         return(
             min_value - 0.1*abs(diff),
-            max_testue + 0.1*abs(diff)
+            max_value + 0.1*abs(diff)
             )
 
 
