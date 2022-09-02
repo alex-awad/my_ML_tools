@@ -154,7 +154,9 @@ class ModelEvaluator:
             y='weight',
             palette=colors,
             alpha=0.8,
-            order=top_weights_df["columns"])
+            order=top_weights_df["columns"],
+            edgecolor="black",
+            linewidth=1)
 
         # Adjust plot style
         ax.set_xticklabels(ax.get_xticklabels(), rotation=35, ha="right")
