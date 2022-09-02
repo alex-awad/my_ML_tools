@@ -292,14 +292,14 @@ class PlotTools:
         ax_train.axis('square')  
         ax_train.set_xlim(*train_lim)
         ax_train.set_ylim(*train_lim)
-        ax_train.set_xlabel(f"True {label_name}")
-        ax_train.set_ylabel(f"Predicted {label_name}")
+        ax_train.set_xlabel(f"true {label_name}")
+        ax_train.set_ylabel(f"predicted {label_name}")
 
         ax_test.axis("square")  
         ax_test.set_xlim(*test_lim)
         ax_test.set_ylim(*test_lim)
-        ax_test.set_xlabel(f"True {label_name}")
-        ax_test.set_ylabel(f"Predicted {label_name}")
+        ax_test.set_xlabel(f"true {label_name}")
+        ax_test.set_ylabel(f"predicted {label_name}")
 
         f.tight_layout()
 
@@ -372,7 +372,7 @@ class PlotTools:
         sns.set_context("notebook", font_scale=font_scale)
 
         # For straight line y = m*x
-        x = np.linspace(-10,10)
+        x = np.linspace(-100,100)
         y = x
         
         # Automatically determine axis limits if they are not set
@@ -410,8 +410,8 @@ class PlotTools:
         ax.axis('square')  
         ax.set_xlim(*ax_lim)
         ax.set_ylim(*ax_lim)
-        ax.set_xlabel(f"True {label_name}")
-        ax.set_ylabel(f"Predicted {label_name}")
+        ax.set_xlabel(f"true {label_name}")
+        ax.set_ylabel(f"predicted {label_name}")
             
         fig.tight_layout()
 
