@@ -179,6 +179,7 @@ class PlotTools:
     fig_title="",
     is_log=False,
     font_scale=1.85,
+    marker_size=70,
     save_fig=False,
     save_location="",
     save_name="Figure",
@@ -217,7 +218,9 @@ class PlotTools:
 
         font_scale (float): Font scale for seaborn.set_context. Defaults
             to 1.85.
-
+            
+        marker_size (int): Marker size in the plots. Defaults to 70.
+        
         save_fig (Boolean): Whether to save the figure. Defaults to False.
 
         save_location (String): Directory to save the figure. Defaults to
@@ -243,13 +246,19 @@ class PlotTools:
 
         # Create plots
         f, (ax_train, ax_test) = plt.subplots(1,2, figsize=(15, 7.5), dpi=80)
-        sns.scatterplot(x=tr_targets, y=tr_predictions, ax=ax_train, s=70)
+        sns.scatterplot(
+            x=tr_targets,
+            y=tr_predictions,
+            ax=ax_train,
+            s=marker_size
+        )
         sns.scatterplot(
             x=tes_targets,
             y=tes_predictions,
             ax=ax_test,
             color="g",
-            s=70)
+            s=marker_size
+        )
         ax_train.plot(x,y, c="r")
         ax_test.plot(x,y, c="r")
 
@@ -331,6 +340,7 @@ class PlotTools:
         fig_title="",
         is_log=False,
         font_scale=1.85,
+        marker_size=70,
         save_fig=False,
         save_location="",
         save_name="Figure"
@@ -360,6 +370,8 @@ class PlotTools:
 
         font_scale (float): Font scale for seaborn.set_context. Defaults
             to 1.85.
+            
+        marker_size (int): Marker size in the plots. Defaults to 70.
 
         save_fig (Boolean): Whether to save the figure. Defaults to False.
 
@@ -385,7 +397,7 @@ class PlotTools:
             x=targets,
             y=predictions,
             ax=ax,
-            s=70
+            s=marker_size
         )
         ax.plot(x, y, c="r")
 
