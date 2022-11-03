@@ -4,15 +4,15 @@ import pickle
 
 
 class DataLoader:
-    """ Class to load in data from either a pandas dataframe or an excel file.
+    """Class to load in data from either a pandas dataframe or an excel file.
     Includes several methods to pre-process the given data, such as splitting
     the data into training and test sets, scaling and data cleanup.
-    
+
     Attributes
     ----------
-    
+
     df (pandas.DataFrame): DataFrame containing the read in data.
-    
+
     rs (int): Random-state for methods using random-seeds. Defaults to 0.
 
     scaler (sklearn.preprocessing.*): Scaler from package sklearn.preprocessing
@@ -25,30 +25,28 @@ class DataLoader:
 
     label_name (String): Name of the label.
 
-    train_inputs (pandas.DataFrame): Dataframe containing the split features 
+    train_inputs (pandas.DataFrame): Dataframe containing the split features
         from training set.
-    
-    test_inputs: 
-    
+
+    test_inputs:
+
     train_targets,
-    
+
     test_targets
     """
-    
-    def __init__(
-        self,
-        df,
-        rs=0
-    ):
+
+    def __init__(self, df, rs=0):
         # Check if pandas.DataFrame is passed as constructor
         if isinstance(df, pd.core.frame.DataFrame):
             self.df = df
         else:
-            raise TypeError("""Argument has to be a pandas dataframe! \n
-            To parse from files, use the inbuilt class methods!""")
+            raise TypeError(
+                """Argument has to be a pandas dataframe! \n
+            To parse from files, use the inbuilt class methods!"""
+            )
 
         self.rs = rs
-        
+
         # Add placeholders for attributes that are assigned later
         self.scaler = None
         self.feature_df = None
@@ -59,22 +57,16 @@ class DataLoader:
         self.train_targets = None
         self.test_targets = None
 
-
     ## Alternative constructors
     @classmethod
-    def from_excel(
-        cls,
-        filepath,
-        **kwargs
-    ):
+    def from_excel(cls, filepath, **kwargs):
         """Creates instance from filepath to an excel file."""
         return cls(pd.read_excel(filepath), **kwargs)
 
-    
     # Static methods
-    @staticmethod 
+    @staticmethod
     def load_model(path):
-        """Loads serialized models and returns them. 
+        """Loads serialized models and returns them.
         Works wih models from scikit-learn that were serialized using pickle.
 
         Parameters:
@@ -83,21 +75,19 @@ class DataLoader:
 
         Returns:
         ----------
-        model: Serialized model from sklearn. 
+        model: Serialized model from sklearn.
 
         """
         # Load serialized model
-        with open(path, 'rb') as pickle_model:
+        with open(path, "rb") as pickle_model:
             model = pickle.load(pickle_model)
             pickle_model.close()
 
         return model
 
-
     ## Get methods
     def get_df(self):
         return self.df
-
 
     ## Utility methods
     def are_na_entries(self):
@@ -111,13 +101,12 @@ class DataLoader:
 
         # Series with number of nan entries per column in the dataframe
         na_series = self.df.isna().sum()
-        return(na_series[na_series.values > 0].size > 0)
-
+        return na_series[na_series.values > 0].size > 0
 
     ## Data cleanup methods
     def remove_equal_cols(self):
         """Remove columns where all fields have the same values.
-        
+
         Returns:
         ---------
         self.df: DataFrame attribute.
@@ -127,13 +116,9 @@ class DataLoader:
         self.df = self.df.drop(drop_cols, axis=1)
         return self.df
 
-
     ## Split dataframe methods
-    def split_features_label(
-        self,
-        label_name,
-        ignore_features=None):
-        """Split features and label from internal dataframe to two 
+    def split_features_label(self, label_name, ignore_features=None):
+        """Split features and label from internal dataframe to two
         separate dataframe and series.
 
         Parameters:
@@ -147,15 +132,15 @@ class DataLoader:
         Returns:
         ----------
         self.feature_df, self.label_series: Attributes of instance.
-        
+
         """
         # Get columns from df as list
         cols = self.df.columns.to_list()
 
         # Get feature columns
         feature_cols = cols.copy()
-        feature_cols.remove(label_name) # Remove label
-        
+        feature_cols.remove(label_name)  # Remove label
+
         # Remove additional features from keyword-argument
         if ignore_features is not None:
             if isinstance(ignore_features, list):
@@ -163,49 +148,46 @@ class DataLoader:
                     feature_cols.remove(feature)
 
             else:
-                feature_cols.remove(ignore_features)    
-        
+                feature_cols.remove(ignore_features)
+
         # Get label column
         self.label_name = label_name
         label_col = label_name
 
-        # Get dataframes and series 
+        # Get dataframes and series
         self.feature_df = self.df[feature_cols].copy()
         self.label_series = self.df[label_col].copy()
 
         # Return feature df and label series
         return self.feature_df, self.label_series
 
-
     def combine_feature_label(self):
-            """Combine separate feature df and label series to a single 
-            dataframe. Overwrites the current dataframe!
+        """Combine separate feature df and label series to a single
+        dataframe. Overwrites the current dataframe!
 
-            This method only works after having applied the method 
-            "split_features_label" before.
-            
-            Returns:
-            ---------
-            self.df: Attributes of instance.
-            """
-            if self.feature_df is None or self.label_series is None:
-                raise ValueError(
-                    "The features and labels have not been split yet")
-            else:
-                self.df = self.feature_df.assign(
-                    **{self.label_name: self.label_series})
+        This method only works after having applied the method
+        "split_features_label" before.
 
-            # Return dataframe
-            return self.df
+        Returns:
+        ---------
+        self.df: Attributes of instance.
+        """
+        if self.feature_df is None or self.label_series is None:
+            raise ValueError("The features and labels have not been split yet")
+        else:
+            self.df = self.feature_df.assign(
+                **{self.label_name: self.label_series}
+            )
+
+        # Return dataframe
+        return self.df
 
     def split_train_test(
-        self,
-        label_name,
-        ignore_features=None,
-        test_size=0.25):
+        self, label_name, ignore_features=None, test_size=0.25
+    ):
         """Uses inbuilt functions to facilitate the train_test_split
         method from scikit-learn.
-        
+
         Parameters:
         ----------
         label_name (String): Name of the label denoted in the internal
@@ -218,7 +200,7 @@ class DataLoader:
 
         Returns:
         ----------
-        (tuple): (self.train_inputs, self.test_inputs, self.train_targets, 
+        (tuple): (self.train_inputs, self.test_inputs, self.train_targets,
             self.test_targets): Dataframes contaning split training and test
             sets with features and labels separated."""
 
@@ -227,31 +209,33 @@ class DataLoader:
 
         # Remove features from inputs
         if ignore_features is not None:
-            remove_feature_df = self.feature_df.drop(
-                ignore_features, axis=1
-            )
+            remove_feature_df = self.feature_df.drop(ignore_features, axis=1)
         else:
             remove_feature_df = self.feature_df
 
         # Split inputs and targets (features and labels for ML)
-        (self.train_inputs,
-        self.test_inputs,
-        self.train_targets,
-        self.test_targets) = train_test_split(
+        (
+            self.train_inputs,
+            self.test_inputs,
+            self.train_targets,
+            self.test_targets,
+        ) = train_test_split(
             remove_feature_df,
             self.label_series,
             test_size=test_size,
-            random_state=self.rs)
-        
-        # Return split dataset
-        return (self.train_inputs,
-        self.test_inputs,
-        self.train_targets,
-        self.test_targets) 
+            random_state=self.rs,
+        )
 
+        # Return split dataset
+        return (
+            self.train_inputs,
+            self.test_inputs,
+            self.train_targets,
+            self.test_targets,
+        )
 
     def scale_inputs(self, scaler=None):
-        """Scale the inputs with a given scaler. 
+        """Scale the inputs with a given scaler.
         It is important to fit the scaler only to the training set,
         not with the validation or test set!
 
@@ -272,7 +256,6 @@ class DataLoader:
         self.train_inputs[:] = self.scaler.transform(self.train_inputs[:])
         self.test_inputs[:] = self.scaler.transform(self.test_inputs[:])
 
-
     def pickle_scaler(self, path):
         """Serialize scaler with pickle.
 
@@ -280,10 +263,9 @@ class DataLoader:
         ----------
         path (String): Path for output of pickled scaler.
         """
-        with open(path, 'wb') as file:
+        with open(path, "wb") as file:
             pickle.dump(self.scaler, file)
             file.close()
-
 
     def scaler_from_pickle(self, path):
         """Load serialized scaler.
@@ -292,6 +274,5 @@ class DataLoader:
         ----------
         path (String): Path of pickled scaler.
         """
-        with open(path, 'rb') as pickle_model:
+        with open(path, "rb") as pickle_model:
             self.scaler = pickle.load(pickle_model)
-
