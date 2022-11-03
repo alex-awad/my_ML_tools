@@ -28,8 +28,8 @@ from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.model_selection import LeaveOneOut
-from .PlotTools import PlotTools
-from .additional.KerasLayers import get_layer_list
+from .plot_tools import PlotTools
+from .additional.keras_layers import get_layer_list
 from .custom_models import AveragePredictor
 
 # Set seeds to get reproducible results
