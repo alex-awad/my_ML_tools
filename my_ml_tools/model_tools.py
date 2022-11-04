@@ -540,7 +540,7 @@ class ModelTrainer_base:
         axs[0].plot(alphas, mean_score)
         axs[0].set_xscale("log")
         axs[0].set_xlabel("Alpha")
-        axs[0].set_ylabel("RMSE")
+        axs[0].set_ylabel("$-RMSE$")
 
         # Get optimal value of alpha from first run
         alpha_1 = grid_results.best_estimator_.get_params()["alpha"]
@@ -576,7 +576,7 @@ class ModelTrainer_base:
         axs[1].plot(alphas, mean_score)
         axs[1].set_xscale("linear")
         axs[1].set_xlabel("Alpha")
-        axs[1].set_ylabel("RMSE")
+        axs[1].set_ylabel("$-RMSE$")
 
         fig.tight_layout()
 
@@ -686,7 +686,7 @@ class ModelTrainer_base:
         axs[0].plot(alphas, mean_score)
         axs[0].set_xscale("log")
         axs[0].set_xlabel("Alpha")
-        axs[0].set_ylabel("RMSE")
+        axs[0].set_ylabel("$-RMSE$")
 
         # Get optimal value of alpha from first run
         alpha_1 = grid_results.best_estimator_.get_params()["alpha"]
@@ -722,7 +722,7 @@ class ModelTrainer_base:
         axs[1].plot(alphas, mean_score)
         axs[1].set_xscale("linear")
         axs[1].set_xlabel("Alpha")
-        axs[1].set_ylabel("RMSE")
+        axs[1].set_ylabel("$-RMSE$")
 
         fig.tight_layout()
 
