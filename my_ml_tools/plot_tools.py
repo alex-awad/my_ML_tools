@@ -240,10 +240,6 @@ class PlotTools:
         """
         sns.set_context("notebook", font_scale=font_scale)
 
-        # For straight line y = m*x
-        x = np.linspace(-10, 10)
-        y = x
-
         # Automatically determine train and test limits if they are not set
         if train_lim is None:
             train_lim = PlotTools.get_limits(tr_predictions, tr_targets)
@@ -263,8 +259,16 @@ class PlotTools:
             color="g",
             s=marker_size,
         )
-        ax_train.plot(x, y, c="r")
-        ax_test.plot(x, y, c="r")
+
+        # Plot reference line y = x
+        x_train = np.linspace(*train_lim)
+        y_train = x_train
+
+        x_test = np.linspace(*test_lim)
+        y_test = x_test
+
+        ax_train.plot(x_train, y_train, c="r")
+        ax_test.plot(x_test, y_test, c="r")
 
         # Set figure title
         f.suptitle(fig_title, fontsize=28)
