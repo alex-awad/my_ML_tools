@@ -4,8 +4,10 @@ import matplotlib
 from matplotlib.ticker import MultipleLocator
 import seaborn as sns
 import numpy as np
+import platform
 
-matplotlib.use("Agg")
+if platform.system() == "Linux":
+    matplotlib.use("Agg")
 
 
 class PlotTools:
